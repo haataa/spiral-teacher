@@ -424,20 +424,30 @@ spiral-teacher/
 
 ## 开发计划
 
-### Phase 1: 核心骨架
+### Phase 1: 核心骨架 ✅
 
-- [ ] 定义数据模型（Knowledge, Feedback, TeachingResponse 等 Pydantic models）
-- [ ] 实现 Reader Agent（代码仓库模式，论文模式后续扩展）
-- [ ] 实现 Learner Agent（先支持 ml_engineer 画像）
-- [ ] 实现 Teacher Agent（先支持 Level 2 和 Level 4 两档）
-- [ ] 实现 Orchestrator 主循环
-- [ ] 实现 Synthesizer Agent
+- [x] 定义数据模型（Knowledge, Feedback, TeachingResponse 等 Pydantic models）
+- [x] 实现 Reader Agent（代码仓库模式，论文模式后续扩展）
+- [x] 实现 Learner Agent（先支持 ml_engineer 画像）
+- [x] 实现 Teacher Agent（支持 Level 0-5 全部层级，层级切换为确定性代码逻辑）
+- [x] 实现 Orchestrator 主循环
+- [x] 实现 Synthesizer Agent
+- [x] CLI 工具（`spiral-teacher generate/synthesize`）+ 断点续跑（`--resume`）
+- [x] 全链路中文默认输出
+- [x] 117 个单元测试
+- [x] E2E 验证（agent-world-model 仓库）
+
+**Phase 1 实现过程中的关键设计演进：**
+- 概念排序从"难度优先"改为"重要性优先"（Concept 新增 importance 字段）
+- Learner 双层防线：prompt 层 + validate_feedback() 代码层硬校验
+- JSON 解析从严格 separator 格式改为多策略容错提取（utils.extract_json_from_text）
+- 渐进式输出：知识图谱/对话/教程在各阶段即时写文件
 
 ### Phase 2: 验证与调优
 
-- [ ] 用 TurboQuant+ 作为测试案例，完整跑一轮
+- [x] 用 agent-world-model 作为测试案例，完整跑多轮（已验证 resume 功能）
 - [ ] 对比人工互动产出的文档 vs 系统产出的文档，评估质量差距
-- [ ] 调优 Learner prompt（这是质量的关键杠杆）
+- [ ] 调优 Learner prompt（读 conversation.md trace，找判断偏差）
 - [ ] 调优讲解层级切换策略
 - [ ] 处理边界情况（概念循环依赖、Learner 持续 confused、空仓库等）
 
@@ -445,9 +455,8 @@ spiral-teacher/
 
 - [ ] 支持论文 URL 输入（通过 alphaXiv MCP 获取内容）
 - [ ] 支持多读者画像（undergraduate, researcher）
-- [ ] 支持中英文输出
+- [x] 支持中英文输出（language 参数，默认中文）
 - [ ] 支持增量更新（代码更新后只重新生成受影响的章节）
-- [ ] CLI 工具：`spiral-teacher generate --repo ./my-project --audience ml_engineer --output tutorial.md`
 
 ---
 

@@ -1,0 +1,9 @@
+name: ml_engineer
+display_name: "ML 工程师"
+math_level: "本科数学完整，熟悉优化和概率"
+coding_level: "Python/C++ 熟练，读过 llama.cpp 源码"
+domain_knowledge: "熟悉 Transformer、KV 缓存、量化基本概念"
+confusion_triggers:
+  - "理论为什么在工程上成立的 gap"
+  - "多个近似叠加后误差是否可控"
+  - "与已知方法（GPTQ, AWQ）的区别"
