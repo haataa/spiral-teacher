@@ -91,6 +91,16 @@ async def generate_tutorial(
 
     # ── Phase 2: 对话主循环 ──
 
+    # 按 importance 过滤概念
+    concepts_map = {c.id: c for c in knowledge.concepts}
+    teaching_order = [
+        cid for cid in knowledge.teaching_order
+        if concepts_map.get(cid) and concepts_map[cid].importance >= config.min_importance
+    ]
+    skipped = len(knowledge.teaching_order) - len(teaching_order)
+    if skipped:
+        _emit("init", f"跳过 {skipped} 个低重要性概念 (importance < {config.min_importance})")
+
     conversation: list[ConversationEntry] = []
     covered_concepts: set[str] = set()
     consecutive_understood = 0
@@ -106,12 +116,12 @@ async def generate_tutorial(
     _emit(EVENT_OVERVIEW_DONE, "鸟瞰概述完成", entry=overview_entry)
 
     # 逐概念对话
-    for concept_idx, concept_id in enumerate(knowledge.teaching_order):
+    for concept_idx, concept_id in enumerate(teaching_order):
         if total_rounds >= config.max_rounds:
             _emit("timeout", f"达到全局轮次上限 ({config.max_rounds})，终止")
             break
 
-        _emit(EVENT_CONCEPT_START, f"概念 [{concept_idx + 1}/{len(knowledge.teaching_order)}]: {concept_id}",
+        _emit(EVENT_CONCEPT_START, f"概念 [{concept_idx + 1}/{len(teaching_order)}]: {concept_id}",
               concept_id=concept_id, concept_idx=concept_idx)
 
         # 引入概念

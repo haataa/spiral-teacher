@@ -146,6 +146,24 @@ def _mock_learner_confused_then_understood(confused_rounds: int = 2) -> LearnerA
 # ── 画像加载 ──
 
 
+def make_knowledge_with_importance() -> Knowledge:
+    """包含不同 importance 级别的知识图谱。"""
+    return Knowledge(
+        project_summary="Test project",
+        concepts=[
+            Concept(id="core", name="Core", category="core", description="Core concept", difficulty=2, importance=5),
+            Concept(id="important", name="Important", category="core", description="Important concept", difficulty=2, importance=4),
+            Concept(id="medium", name="Medium", category="support", description="Medium concept", difficulty=1, importance=3),
+            Concept(id="minor", name="Minor", category="infra", description="Minor detail", difficulty=1, importance=2),
+            Concept(id="trivial", name="Trivial", category="infra", description="Trivial detail", difficulty=1, importance=1),
+        ],
+        dependencies=[],
+        teaching_order=["core", "important", "medium", "minor", "trivial"],
+        source_type="repository",
+        source_path="/tmp/test",
+    )
+
+
 class TestLoadAudienceProfile:
 
     def test_load_existing_profile(self):
@@ -396,3 +414,50 @@ class TestGenerateTutorial:
         roles = {e.role for e in result.conversation}
         assert "teacher" in roles
         assert "learner" in roles
+
+    @pytest.mark.asyncio
+    async def test_min_importance_filters_concepts(self):
+        """min_importance 过滤低重要性概念。"""
+        knowledge = make_knowledge_with_importance()
+        config = make_config(min_importance=3)
+
+        result = await generate_tutorial(
+            config,
+            reader=_mock_reader(knowledge),
+            teacher=_mock_teacher(),
+            learner=_mock_learner_always_understood(),
+        )
+
+        # 只应覆盖 importance >= 3 的概念 (core=5, important=4, medium=3)
+        introduced = {
+            e.teaching_response.concept_id
+            for e in result.conversation
+            if e.role == "teacher" and e.teaching_response
+            and e.teaching_response.concept_id != "overview"
+        }
+        assert "core" in introduced
+        assert "important" in introduced
+        assert "medium" in introduced
+        assert "minor" not in introduced
+        assert "trivial" not in introduced
+
+    @pytest.mark.asyncio
+    async def test_min_importance_1_includes_all(self):
+        """min_importance=1 不过滤任何概念。"""
+        knowledge = make_knowledge_with_importance()
+        config = make_config(min_importance=1)
+
+        result = await generate_tutorial(
+            config,
+            reader=_mock_reader(knowledge),
+            teacher=_mock_teacher(),
+            learner=_mock_learner_always_understood(),
+        )
+
+        introduced = {
+            e.teaching_response.concept_id
+            for e in result.conversation
+            if e.role == "teacher" and e.teaching_response
+            and e.teaching_response.concept_id != "overview"
+        }
+        assert introduced == {"core", "important", "medium", "minor", "trivial"}

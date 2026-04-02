@@ -23,7 +23,7 @@ Synthesizer (Opus) → Tutorial Markdown
 
 ## Key Design Decisions
 
-1. **Importance-first teaching order** (not difficulty-first). Reader prompt ranks concepts by importance to project understanding. CLI architecture goes last, core algorithms first.
+1. **Importance-first teaching order** (not difficulty-first). Reader prompt ranks concepts by importance to project understanding. CLI architecture goes last, core algorithms first. Concepts below `min_importance` threshold (default 3) are skipped entirely.
 
 2. **Dual-layer anti-leniency for Learner**:
    - Prompt layer: confusion_triggers checklist, forced wrong_assumption for hard concepts, confidence anchors
@@ -50,7 +50,7 @@ spiral-teacher generate --repo /path/to/repo --resume --max-rounds 10
 # Re-synthesize from existing conversation data
 spiral-teacher synthesize --output output --language zh
 
-# Run tests (117 unit tests)
+# Run tests (119 unit tests)
 python -m pytest tests/ -m "not integration"
 ```
 
@@ -82,7 +82,7 @@ src/spiral_teacher/
 └── profiles/           # Audience profiles (YAML)
     └── ml_engineer.yaml
 docs/contracts/         # Agent contracts (interface specs)
-tests/                  # 117 unit tests (mock LLM, no API needed)
+tests/                  # 119 unit tests (mock LLM, no API needed)
 scripts/                # Legacy E2E scripts (prefer CLI instead)
 ```
 

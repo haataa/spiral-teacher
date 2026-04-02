@@ -279,6 +279,7 @@ def generate_tutorial(
     output_path: str,         # 输出文档路径
     max_rounds: int = 30,     # 最大对话轮次
     max_rounds_per_concept: int = 6,  # 单概念最大轮次
+    min_importance: int = 3,          # 跳过低重要性概念（1-5）
 ):
     # ─── Phase 1: 知识提取 ───
     knowledge = reader.extract(source, topic)
@@ -434,7 +435,7 @@ spiral-teacher/
 - [x] 实现 Synthesizer Agent
 - [x] CLI 工具（`spiral-teacher generate/synthesize`）+ 断点续跑（`--resume`）
 - [x] 全链路中文默认输出
-- [x] 117 个单元测试
+- [x] 119 个单元测试
 - [x] E2E 验证（agent-world-model 仓库）
 
 **Phase 1 实现过程中的关键设计演进：**

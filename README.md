@@ -42,6 +42,7 @@ spiral-teacher generate
   --output PATH             输出目录 (default: output)
   --max-rounds N            最大对话轮次 (default: 20)
   --max-rounds-per-concept N 单概念最大轮次 (default: 4)
+  --min-importance N        跳过重要性低于此值的概念 (1-5, default: 3)
   --resume                  从上次运行继续
   --no-synthesize           跳过教程合成步骤
 

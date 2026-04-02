@@ -18,6 +18,7 @@
 | description | str | Y | 一句话描述这个概念做什么 |
 | prerequisites | list[str] | N | 前置概念 ID 列表，默认空 |
 | difficulty | int | Y | 1-5，1 最简单 |
+| importance | int | N | 1-5，默认 3。1=peripheral (CLI parsing)，5=core to understanding the project。用于 `min_importance` 过滤 |
 | source_files | list[str] | N | 相关源文件路径 |
 | key_equations | list[str] | N | 关键公式（LaTeX 格式） |
 | related_concepts | list[str] | N | 相关概念 ID |
@@ -160,6 +161,7 @@
 | output_path | str | Y | 输出文档路径 |
 | max_rounds | int | N | 最大对话轮次，默认 30 |
 | max_rounds_per_concept | int | N | 单概念最大轮次，默认 6 |
+| min_importance | int | N | 概念重要性过滤阈值，1-5，默认 3。importance 低于此值的概念将被跳过 |
 
 ### 11. SynthesisInput（Synthesizer 输入）
 

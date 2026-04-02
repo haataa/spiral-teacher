@@ -176,6 +176,7 @@ async def _cmd_generate(args):
         language=args.language,
         max_rounds=args.max_rounds,
         max_rounds_per_concept=args.max_rounds_per_concept,
+        min_importance=args.min_importance,
     )
 
     print(f"=== Spiral Teacher ===")
@@ -228,7 +229,12 @@ def _check_resume(output_dir: Path, args) -> dict | None:
         if e.feedback and e.feedback.type == "understood":
             covered.add(e.feedback.concept_id)
 
-    remaining = [cid for cid in knowledge.teaching_order if cid not in covered]
+    concepts_map = {c.id: c for c in knowledge.concepts}
+    remaining = [
+        cid for cid in knowledge.teaching_order
+        if cid not in covered
+        and concepts_map.get(cid) and concepts_map[cid].importance >= args.min_importance
+    ]
     print(f"\nResuming: {len(covered)} concepts covered, {len(remaining)} remaining")
 
     return {
@@ -392,6 +398,7 @@ def main():
     gen.add_argument("--output", default="output", help="Output directory (default: output)")
     gen.add_argument("--max-rounds", type=int, default=20, help="Max total dialogue rounds (default: 20)")
     gen.add_argument("--max-rounds-per-concept", type=int, default=4, help="Max rounds per concept (default: 4)")
+    gen.add_argument("--min-importance", type=int, default=3, help="Skip concepts with importance below this (1-5, default: 3)")
     gen.add_argument("--resume", action="store_true", help="Resume from previous run")
     gen.add_argument("--no-synthesize", action="store_true", help="Skip tutorial synthesis step")
 

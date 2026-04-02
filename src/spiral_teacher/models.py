@@ -217,6 +217,7 @@ class TutorialConfig(BaseModel):
     language: str = "zh"
     max_rounds: int = 30
     max_rounds_per_concept: int = 6
+    min_importance: int = Field(default=3, ge=1, le=5, description="Skip concepts with importance below this threshold")
 
 
 # ── Synthesizer 输入 ──
