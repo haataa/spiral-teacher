@@ -72,7 +72,7 @@ spiral-teacher synthesize
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest tests/ -m "not integration"  # 117 unit tests
+python -m pytest tests/ -m "not integration"  # 127 unit tests
 ```
 
 详见 [CLAUDE.md](CLAUDE.md) 的开发指引和 [PLAN.md](PLAN.md) 的项目路线图。
