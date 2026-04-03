@@ -1,78 +1,76 @@
 # Spiral Teacher
 
-基于多 Agent 协作的自适应教学内容生成系统。模拟"螺旋式深入"的人类学习互动过程，自动为代码仓库生成多层级教学文档。
+多 Agent 协作的自适应教学系统。自动为代码仓库生成螺旋式深入的教学文档。
 
-## Quick Start
+```
+代码仓库 → Reader (知识提取) → Teacher ↔ Learner (多轮对话) → Synthesizer (教程合成)
+```
+
+## 安装
 
 ```bash
-# 安装
 uv sync
+```
 
-# 生成教程（默认中文）
-uv run spiral-teacher generate --repo /path/to/your/repo
+## 配置
 
-# 断点续跑（从上次停下的概念继续）
-uv run spiral-teacher generate --repo /path/to/your/repo --resume --max-rounds 10
+设置 Anthropic API 访问（二选一）：
 
-# 只重新合成教程（不重跑对话）
+```bash
+# 方式一：官方 API
+export ANTHROPIC_API_KEY=sk-ant-...
+
+# 方式二：兼容 API 代理
+export ANTHROPIC_AUTH_TOKEN=your-token
+export ANTHROPIC_BASE_URL=https://your-proxy.example.com
+```
+
+## 使用
+
+```bash
+# 生成教程
+uv run spiral-teacher generate --repo /path/to/repo
+
+# 断点续跑
+uv run spiral-teacher generate --repo /path/to/repo --resume
+
+# 从已有对话重新合成教程
 uv run spiral-teacher synthesize --output output
 ```
 
-需要设置 `ANTHROPIC_API_KEY` 环境变量。
+### 参数
 
-## How It Works
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `--repo` | (必需) | 代码仓库路径 |
+| `--output` | `output` | 输出目录 |
+| `--language` | `zh` | 输出语言 |
+| `--audience` | `ml_engineer` | 读者画像 |
+| `--max-rounds` | `20` | 最大对话轮次 |
+| `--min-importance` | `3` | 跳过低重要性概念 (1-5) |
+| `--resume` | - | 从上次停下的概念继续 |
+| `--no-synthesize` | - | 跳过教程合成步骤 |
 
-```
-代码仓库 → Reader (提取知识图谱) → Teacher ↔ Learner (多轮对话) → Synthesizer (合成教程)
-```
+### 输出
 
-1. **Reader** 扫描仓库，用 LLM 提取概念、依赖关系和教学顺序
-2. **Teacher** 按重要性顺序逐概念讲解（Level 0-5，从直觉到严格推导）
-3. **Learner** 模拟目标读者的理解过程，提出困惑、错误假设、要求深入或举例
-4. **Synthesizer** 将对话重组织为连贯的教学文档（保留好的类比和"你可能以为...但实际上..."）
+| 文件 | 说明 |
+|------|------|
+| `knowledge.json` | 概念、依赖关系、教学顺序 |
+| `conversation.md` | 对话记录（实时更新，可边跑边看） |
+| `tutorial.md` | 最终教学文档 |
+| `summary.txt` | 统计摘要 |
 
-## CLI Options
+### 费用
 
-```
-spiral-teacher generate
-  --repo PATH              代码仓库路径（必需）
-  --topic TEXT              聚焦主题（可选）
-  --audience TEXT           读者画像 (default: ml_engineer)
-  --language TEXT           输出语言 (default: zh)
-  --output PATH             输出目录 (default: output)
-  --max-rounds N            最大对话轮次 (default: 20)
-  --max-rounds-per-concept N 单概念最大轮次 (default: 4)
-  --min-importance N        跳过重要性低于此值的概念 (1-5, default: 3)
-  --resume                  从上次运行继续
-  --no-synthesize           跳过教程合成步骤
+约 $5-8 / 完整教程（20 轮对话）。`--max-rounds` 可控制。
 
-spiral-teacher synthesize
-  --output PATH             包含 conversation.json 和 knowledge.json 的目录
-  --audience TEXT            读者画像
-  --language TEXT            输出语言
-```
-
-## Output Files
-
-运行后在 `output/` 目录生成：
-
-| 文件 | 生成时机 | 内容 |
-|------|---------|------|
-| `knowledge.json` | Reader 完成后立即 | 概念列表、依赖关系、教学顺序 |
-| `conversation.md` | 每条对话即时追加 | Markdown 格式的完整对话记录（可实时查看） |
-| `conversation.json` | 每个概念完成后更新 | 结构化对话数据（用于 resume 和 synthesize） |
-| `tutorial.md` | Synthesizer 完成后 | 最终教学文档 |
-| `summary.txt` | 全部完成后 | 统计摘要 |
-
-## Cost
-
-约 $5-8 / 完整教程（20-40 轮对话）。可通过 `--max-rounds` 控制。
-
-## Development
+## 开发
 
 ```bash
 uv sync --extra dev
-uv run pytest tests/ -m "not integration"  # 127 unit tests
+uv run pytest tests/ -m "not integration"
 ```
 
-详见 [CLAUDE.md](CLAUDE.md) 的开发指引和 [PLAN.md](PLAN.md) 的项目路线图。
+## License
+
+MIT
