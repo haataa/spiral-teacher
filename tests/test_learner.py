@@ -193,11 +193,27 @@ class TestValidateConceptFeedback:
         )
 
     def test_hard_concept_first_round_downgrades_to_go_deeper(self):
-        """高难度概念首轮 understood → go_deeper"""
+        """difficulty >= 4 首轮 understood → go_deeper"""
         fb = self._make_understood()
         result = validate_concept_feedback(fb, concept_difficulty=4, rounds_on_current=1, past_feedback_types=[])
         assert result.type == "go_deeper"
         assert result.confidence <= 0.75
+
+    def test_medium_concept_first_round_passes(self):
+        """difficulty=3 首轮 understood → 不拦截（Rule 4 仅对 >= 4 生效）"""
+        fb = self._make_understood()
+        # Rule 5 仍会拦截（无 request_example），所以降级为 request_example 而非 understood
+        result = validate_concept_feedback(fb, concept_difficulty=3, rounds_on_current=1, past_feedback_types=[])
+        assert result.type == "request_example"  # Rule 5 kicks in
+
+    def test_medium_concept_with_example_passes(self):
+        """difficulty=3 有 request_example 历史时 understood → 通过"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(
+            fb, concept_difficulty=3, rounds_on_current=2,
+            past_feedback_types=["request_example"],
+        )
+        assert result.type == "understood"
 
     def test_hard_concept_no_example_downgrades_to_request_example(self):
         """高难度概念未经 request_example 就 understood → request_example"""

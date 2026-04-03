@@ -248,6 +248,7 @@ def _check_resume(output_dir: Path, args) -> dict | None:
 async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resume: dict) -> SynthesisInput:
     """从上次停下的地方继续。"""
     from spiral_teacher.agents.learner import LearnerAgent, validate_concept_feedback, validate_feedback
+    from spiral_teacher.orchestrator import _concept_round_limit
     from spiral_teacher.agents.teacher import TeacherAgent
 
     lang = config.language
@@ -283,7 +284,10 @@ async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resum
         rounds_on_current = 0
         past_feedback_types: list[str] = []
 
-        while rounds_on_current < config.max_rounds_per_concept:
+        round_limit = _concept_round_limit(
+            concepts_map[concept_id].difficulty, config.max_rounds_per_concept,
+        )
+        while rounds_on_current < round_limit:
             if total_rounds >= config.max_rounds:
                 break
 

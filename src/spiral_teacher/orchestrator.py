@@ -36,6 +36,17 @@ EVENT_FINISHED = "finished"
 OnEventCallback = Callable[[str, str, dict[str, Any]], None]
 """回调签名: (event_type, message, data)"""
 
+_ADAPTIVE_ROUND_LIMITS = {1: 2, 2: 2, 3: 4, 4: 5, 5: 6}
+
+
+def _concept_round_limit(difficulty: int, global_limit: int) -> int:
+    """根据概念难度计算自适应轮次上限。
+
+    简单概念快速通过，困难概念充分探讨。
+    """
+    return min(_ADAPTIVE_ROUND_LIMITS.get(difficulty, global_limit), global_limit)
+
+
 CHALLENGE_PROMPT = (
     "The learner has been understanding concepts quickly. "
     "For this concept, dig deeper into potential misconceptions and edge cases. "
@@ -145,7 +156,10 @@ async def generate_tutorial(
         past_feedback_types: list[str] = []
 
         # 当前概念的对话循环
-        while rounds_on_current < config.max_rounds_per_concept:
+        round_limit = _concept_round_limit(
+            concepts_map[concept_id].difficulty, config.max_rounds_per_concept,
+        )
+        while rounds_on_current < round_limit:
             if total_rounds >= config.max_rounds:
                 break
 

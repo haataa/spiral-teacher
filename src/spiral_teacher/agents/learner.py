@@ -109,11 +109,11 @@ def validate_concept_feedback(
     4. 高难度概念首轮 understood → 降级为 go_deeper
     5. 高难度概念从未 request_example 就 understood → 降级为 request_example
     """
-    if feedback.type != "understood" or concept_difficulty < 3:
+    if feedback.type != "understood":
         return feedback
 
-    # Rule 4: 高难度概念首轮不允许直接 understood
-    if rounds_on_current <= 1:
+    # Rule 4: 高难度概念首轮不允许直接 understood (difficulty >= 4)
+    if concept_difficulty >= 4 and rounds_on_current <= 1:
         logger.info(
             "validate_concept_feedback: 高难度概念 (difficulty=%d) 首轮 understood，降级为 go_deeper",
             concept_difficulty,
@@ -128,8 +128,8 @@ def validate_concept_feedback(
             understanding_summary=feedback.understanding_summary,
         )
 
-    # Rule 5: 高难度概念从未 request_example 就不允许 understood
-    if "request_example" not in past_feedback_types:
+    # Rule 5: 高难度概念从未 request_example 就不允许 understood (difficulty >= 3)
+    if concept_difficulty >= 3 and "request_example" not in past_feedback_types:
         logger.info(
             "validate_concept_feedback: 高难度概念 (difficulty=%d) 未经 request_example 就 understood，降级",
             concept_difficulty,
