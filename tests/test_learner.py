@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock, MagicMock
 import anthropic
 import pytest
 
-from spiral_teacher.agents.learner import LearnerAgent, validate_feedback
+from spiral_teacher.agents.learner import LearnerAgent, validate_concept_feedback, validate_feedback
 from spiral_teacher.models import (
     AudienceProfile,
     Concept,
@@ -177,6 +177,71 @@ class TestValidateFeedback:
         )
         result = validate_feedback(fb)
         assert result.type == "request_example"
+
+
+# ── validate_concept_feedback 测试（概念级校验）──
+
+
+class TestValidateConceptFeedback:
+    """覆盖概念级降级场景。"""
+
+    def _make_understood(self, confidence=0.9):
+        return Feedback(
+            type="understood", concept_id="c", confidence=confidence,
+            detail=FeedbackDetail(),
+            understanding_summary="This concept works by transforming the input through an orthogonal matrix, preserving norms while redistributing energy across dimensions.",
+        )
+
+    def test_hard_concept_first_round_downgrades_to_go_deeper(self):
+        """高难度概念首轮 understood → go_deeper"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(fb, concept_difficulty=4, rounds_on_current=1, past_feedback_types=[])
+        assert result.type == "go_deeper"
+        assert result.confidence <= 0.75
+
+    def test_hard_concept_no_example_downgrades_to_request_example(self):
+        """高难度概念未经 request_example 就 understood → request_example"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(
+            fb, concept_difficulty=3, rounds_on_current=2,
+            past_feedback_types=["go_deeper"],
+        )
+        assert result.type == "request_example"
+        assert result.confidence <= 0.80
+
+    def test_easy_concept_first_round_passes(self):
+        """低难度概念首轮 understood → 通过"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(fb, concept_difficulty=2, rounds_on_current=1, past_feedback_types=[])
+        assert result.type == "understood"
+        assert result.confidence == 0.9
+
+    def test_hard_concept_with_example_history_passes(self):
+        """高难度概念有 request_example 历史时 understood → 通过"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(
+            fb, concept_difficulty=4, rounds_on_current=3,
+            past_feedback_types=["go_deeper", "request_example"],
+        )
+        assert result.type == "understood"
+        assert result.confidence == 0.9
+
+    def test_non_understood_passes_through(self):
+        """非 understood 类型不受影响。"""
+        fb = Feedback(
+            type="confused", concept_id="c", confidence=0.3,
+            detail=FeedbackDetail(stuck_point="step 2"),
+            understanding_summary="Lost on step 2",
+        )
+        result = validate_concept_feedback(fb, concept_difficulty=5, rounds_on_current=1, past_feedback_types=[])
+        assert result.type == "confused"
+        assert result.confidence == 0.3
+
+    def test_rule4_takes_priority_over_rule5(self):
+        """首轮 + 无 example → Rule 4 (go_deeper) 优先于 Rule 5 (request_example)"""
+        fb = self._make_understood()
+        result = validate_concept_feedback(fb, concept_difficulty=4, rounds_on_current=1, past_feedback_types=[])
+        assert result.type == "go_deeper"
 
 
 # ── LearnerAgent mock 测试 ──

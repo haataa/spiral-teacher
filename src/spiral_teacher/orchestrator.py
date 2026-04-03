@@ -9,7 +9,7 @@ from typing import Any
 
 import yaml
 
-from spiral_teacher.agents.learner import LearnerAgent, validate_feedback
+from spiral_teacher.agents.learner import LearnerAgent, validate_concept_feedback, validate_feedback
 from spiral_teacher.agents.reader import ReaderAgent
 from spiral_teacher.agents.teacher import TeacherAgent
 from spiral_teacher.models import (
@@ -142,6 +142,7 @@ async def generate_tutorial(
 
         current_level = tr.level
         rounds_on_current = 0
+        past_feedback_types: list[str] = []
 
         # 当前概念的对话循环
         while rounds_on_current < config.max_rounds_per_concept:
@@ -160,6 +161,13 @@ async def generate_tutorial(
                 conversation=conversation,
             )
             fb = validate_feedback(fb)
+            fb = validate_concept_feedback(
+                fb,
+                concept_difficulty=concepts_map[concept_id].difficulty,
+                rounds_on_current=rounds_on_current,
+                past_feedback_types=past_feedback_types,
+            )
+            past_feedback_types.append(fb.type)
 
             learner_entry = ConversationEntry(
                 role="learner", feedback=fb, raw_text=learner_raw,

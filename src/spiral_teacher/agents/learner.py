@@ -95,6 +95,58 @@ def validate_feedback(feedback: Feedback) -> Feedback:
     return feedback
 
 
+def validate_concept_feedback(
+    feedback: Feedback,
+    concept_difficulty: int,
+    rounds_on_current: int,
+    past_feedback_types: list[str],
+) -> Feedback:
+    """概念级反馈校验（有状态）。
+
+    在 validate_feedback 之后调用，增加需要上下文信息的校验规则。
+
+    规则：
+    4. 高难度概念首轮 understood → 降级为 go_deeper
+    5. 高难度概念从未 request_example 就 understood → 降级为 request_example
+    """
+    if feedback.type != "understood" or concept_difficulty < 3:
+        return feedback
+
+    # Rule 4: 高难度概念首轮不允许直接 understood
+    if rounds_on_current <= 1:
+        logger.info(
+            "validate_concept_feedback: 高难度概念 (difficulty=%d) 首轮 understood，降级为 go_deeper",
+            concept_difficulty,
+        )
+        return Feedback(
+            type="go_deeper",
+            concept_id=feedback.concept_id,
+            detail=FeedbackDetail(
+                deeper_question="This is a complex concept. Let me verify my understanding more carefully.",
+            ),
+            confidence=min(feedback.confidence, 0.75),
+            understanding_summary=feedback.understanding_summary,
+        )
+
+    # Rule 5: 高难度概念从未 request_example 就不允许 understood
+    if "request_example" not in past_feedback_types:
+        logger.info(
+            "validate_concept_feedback: 高难度概念 (difficulty=%d) 未经 request_example 就 understood，降级",
+            concept_difficulty,
+        )
+        return Feedback(
+            type="request_example",
+            concept_id=feedback.concept_id,
+            detail=FeedbackDetail(
+                request="Can you give me a concrete example with specific numbers to verify my understanding?",
+            ),
+            confidence=min(feedback.confidence, 0.80),
+            understanding_summary=feedback.understanding_summary,
+        )
+
+    return feedback
+
+
 # ── LearnerAgent ──
 
 
@@ -264,9 +316,8 @@ def _learner_extra_instructions(language: str) -> str:
         "1. **Core Innovation**: What is novel or unique about this approach? "
         "How is it different from existing methods? Always ask about the key insight.",
         "",
-        "2. **Concrete Examples**: For any concept with difficulty >= 3, "
-        "you MUST use `request_example` at least once to ask for a specific, "
-        "worked example with real numbers or real code. Abstract explanations are not enough.",
+        "2. **Concrete Examples**: Abstract explanations are not enough. "
+        "Refer to Step 7 in your Understanding Check Protocol for when to use `request_example`.",
         "",
         "3. **Practical Usage**: How do I actually use this? What are the benefits? "
         "What problems does it solve that I couldn't solve before? "

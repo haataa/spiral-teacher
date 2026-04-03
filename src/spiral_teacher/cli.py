@@ -247,7 +247,7 @@ def _check_resume(output_dir: Path, args) -> dict | None:
 
 async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resume: dict) -> SynthesisInput:
     """从上次停下的地方继续。"""
-    from spiral_teacher.agents.learner import LearnerAgent, validate_feedback
+    from spiral_teacher.agents.learner import LearnerAgent, validate_concept_feedback, validate_feedback
     from spiral_teacher.agents.teacher import TeacherAgent
 
     lang = config.language
@@ -257,6 +257,7 @@ async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resum
     knowledge = resume["knowledge"]
     conversation = list(resume["conversation"])
     covered = set(resume["covered"])
+    concepts_map = {c.id: c for c in knowledge.concepts}
     total_rounds = 0
     consecutive_understood = 0
 
@@ -280,6 +281,7 @@ async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resum
 
         current_level = tr.level
         rounds_on_current = 0
+        past_feedback_types: list[str] = []
 
         while rounds_on_current < config.max_rounds_per_concept:
             if total_rounds >= config.max_rounds:
@@ -297,6 +299,13 @@ async def _run_with_resume(config: TutorialConfig, writer: ProgressWriter, resum
                 conversation=conversation,
             )
             fb = validate_feedback(fb)
+            fb = validate_concept_feedback(
+                fb,
+                concept_difficulty=concepts_map[concept_id].difficulty,
+                rounds_on_current=rounds_on_current,
+                past_feedback_types=past_feedback_types,
+            )
+            past_feedback_types.append(fb.type)
 
             learner_entry = ConversationEntry(
                 role="learner", feedback=fb, raw_text=learner_raw,
