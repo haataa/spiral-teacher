@@ -38,6 +38,11 @@ def _setup_logging():
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("anthropic").setLevel(logging.WARNING)
 
+    # Windows 终端默认 GBK，遇到 Unicode 字符会崩溃
+    if sys.stdout.encoding and sys.stdout.encoding.lower().replace("-", "") != "utf8":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 # ── 渐进式输出 ──
 
