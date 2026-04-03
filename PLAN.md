@@ -435,8 +435,8 @@ spiral-teacher/
 - [x] 实现 Synthesizer Agent
 - [x] CLI 工具（`spiral-teacher generate/synthesize`）+ 断点续跑（`--resume`）
 - [x] 全链路中文默认输出
-- [x] 125 个单元测试
-- [x] E2E 验证（agent-world-model 仓库、Eureka 仓库）
+- [x] 127 个单元测试
+- [x] E2E 验证（agent-world-model、Eureka、RF-Agent 仓库）
 
 **Phase 1 实现过程中的关键设计演进：**
 - 概念排序从"难度优先"改为"重要性优先"（Concept 新增 importance 字段）
@@ -453,6 +453,7 @@ spiral-teacher/
   - 新增 `validate_concept_feedback()` 概念级有状态校验：Rule 4（高难度首轮 understood → go_deeper）、Rule 5（无 request_example 就 understood → request_example）
   - E2E 验证（Eureka 仓库）：request_example 0→4, go_deeper 2→10, 每概念深度 2→5 轮
 - [x] 用 Eureka 作为第二个测试案例验证调优效果
+- [x] 用 RF-Agent 作为第三个测试案例验证覆盖率优化（每概念 5.0→3.3 轮）
 - [ ] 对比人工互动产出的文档 vs 系统产出的文档，评估质量差距
 - [ ] 调优讲解层级切换策略
 - [ ] 处理边界情况（概念循环依赖、Learner 持续 confused、空仓库等）

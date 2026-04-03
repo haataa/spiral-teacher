@@ -83,13 +83,13 @@ src/spiral_teacher/
 └── profiles/           # Audience profiles (YAML)
     └── ml_engineer.yaml
 docs/contracts/         # Agent contracts (interface specs)
-tests/                  # 119 unit tests (mock LLM, no API needed)
+tests/                  # 127 unit tests (mock LLM, no API needed)
 scripts/                # Legacy E2E scripts (prefer CLI instead)
 ```
 
 ## Current Status (Phase 2 in progress)
 
-All core agents implemented and tested. Learner prompt tuned with stateful concept-level validation. E2E validated on `agent-world-model` and `Eureka` repos.
+All core agents implemented and tested. Learner prompt tuned with stateful concept-level validation. E2E validated on `agent-world-model`, `Eureka`, and `RF-Agent` repos.
 See PLAN.md for Phase 2/3 roadmap.
 
 ### Known issues
