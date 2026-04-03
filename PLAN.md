@@ -435,22 +435,29 @@ spiral-teacher/
 - [x] 实现 Synthesizer Agent
 - [x] CLI 工具（`spiral-teacher generate/synthesize`）+ 断点续跑（`--resume`）
 - [x] 全链路中文默认输出
-- [x] 119 个单元测试
-- [x] E2E 验证（agent-world-model 仓库）
+- [x] 125 个单元测试
+- [x] E2E 验证（agent-world-model 仓库、Eureka 仓库）
 
 **Phase 1 实现过程中的关键设计演进：**
 - 概念排序从"难度优先"改为"重要性优先"（Concept 新增 importance 字段）
-- Learner 双层防线：prompt 层 + validate_feedback() 代码层硬校验
+- Learner 三层防线：prompt 层（7 步理解检查协议）+ validate_feedback() 无状态校验 + validate_concept_feedback() 概念级有状态校验
 - JSON 解析从严格 separator 格式改为多策略容错提取（utils.extract_json_from_text）
 - 渐进式输出：知识图谱/对话/教程在各阶段即时写文件
 
 ### Phase 2: 验证与调优
 
 - [x] 用 agent-world-model 作为测试案例，完整跑多轮（已验证 resume 功能）
+- [x] 调优 Learner prompt（读 conversation.md trace，找判断偏差）
+  - 强化 confusion_triggers checklist（Step 4：从"不许 understood"升级为"应当 confused"）
+  - 新增 Step 6（First Encounter Rule）和 Step 7（Example Requirement）
+  - 新增 `validate_concept_feedback()` 概念级有状态校验：Rule 4（高难度首轮 understood → go_deeper）、Rule 5（无 request_example 就 understood → request_example）
+  - E2E 验证（Eureka 仓库）：request_example 0→4, go_deeper 2→10, 每概念深度 2→5 轮
+- [x] 用 Eureka 作为第二个测试案例验证调优效果
 - [ ] 对比人工互动产出的文档 vs 系统产出的文档，评估质量差距
-- [ ] 调优 Learner prompt（读 conversation.md trace，找判断偏差）
 - [ ] 调优讲解层级切换策略
 - [ ] 处理边界情况（概念循环依赖、Learner 持续 confused、空仓库等）
+- [ ] 解决 confused=0 问题（Sonnet 不愿承认困惑，倾向用 go_deeper 替代）
+- [ ] 优化覆盖率与深度的平衡（当前每概念 ~5 轮，20 轮仅覆盖 4/23 概念）
 
 ### Phase 3: 扩展
 

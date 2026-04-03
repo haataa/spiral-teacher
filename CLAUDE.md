@@ -25,9 +25,10 @@ Synthesizer (Opus) → Tutorial Markdown
 
 1. **Importance-first teaching order** (not difficulty-first). Reader prompt ranks concepts by importance to project understanding. CLI architecture goes last, core algorithms first. Concepts below `min_importance` threshold (default 3) are skipped entirely.
 
-2. **Dual-layer anti-leniency for Learner**:
-   - Prompt layer: confusion_triggers checklist, forced wrong_assumption for hard concepts, confidence anchors
-   - Code layer: `validate_feedback()` — understood + confidence < 0.85 → downgrade to go_deeper; understood + short summary → downgrade; confused + high confidence → correct
+2. **Triple-layer anti-leniency for Learner**:
+   - Prompt layer: confusion_triggers checklist (Step 4), first encounter rule (Step 6), example requirement (Step 7), forced wrong_assumption for hard concepts, confidence anchors
+   - Code layer (stateless): `validate_feedback()` — understood + confidence < 0.85 → go_deeper; understood + short summary → go_deeper; confused + high confidence → correct
+   - Code layer (stateful): `validate_concept_feedback()` — hard concept first-round understood → go_deeper; hard concept without prior request_example → request_example
 
 3. **Graceful degradation for parsing**: Teacher/Learner outputs may not follow JSON+separator format. `utils.extract_json_from_text()` tries 3 strategies (separator → ```json block → brute-force { } matching). If all fail, Teacher degrades to raw text as content, Learner degrades to "confused".
 
@@ -50,7 +51,7 @@ spiral-teacher generate --repo /path/to/repo --resume --max-rounds 10
 # Re-synthesize from existing conversation data
 spiral-teacher synthesize --output output --language zh
 
-# Run tests (119 unit tests)
+# Run tests (125 unit tests)
 python -m pytest tests/ -m "not integration"
 ```
 
@@ -86,10 +87,14 @@ tests/                  # 119 unit tests (mock LLM, no API needed)
 scripts/                # Legacy E2E scripts (prefer CLI instead)
 ```
 
-## Current Status (Phase 1 complete)
+## Current Status (Phase 2 in progress)
 
-All core agents implemented and tested. E2E validated on `agent-world-model` repo.
+All core agents implemented and tested. Learner prompt tuned with stateful concept-level validation. E2E validated on `agent-world-model` and `Eureka` repos.
 See PLAN.md for Phase 2/3 roadmap.
+
+### Known issues
+- Learner (Sonnet) never produces `confused` feedback — prefers `go_deeper` instead. May need further prompt tuning or a code-level rule.
+- Per-concept depth (~5 rounds) vs coverage trade-off: 20 rounds covers only ~4 concepts. Consider increasing `max_rounds` for repos with many concepts.
 
 ## Cost Estimate
 
