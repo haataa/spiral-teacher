@@ -3,7 +3,7 @@ name = "spiral-teacher"
 version = "0.1.0"
 description = "Multi-agent adaptive teaching content generation system"
 readme = "README.md"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 dependencies = [
     "pydantic>=2.0",
