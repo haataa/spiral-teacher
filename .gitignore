@@ -1,6 +1,11 @@
 # Generated output
 output/
 output_*/
+output-*/
+
+# Internal dev docs
+CLAUDE.md
+PLAN.md
 
 # Python
 __pycache__/
