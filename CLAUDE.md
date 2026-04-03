@@ -40,7 +40,7 @@ Synthesizer (Opus) → Tutorial Markdown
 
 ```bash
 # Install
-pip install -e ".[dev]"
+uv sync --extra dev
 
 # Generate tutorial
 spiral-teacher generate --repo /path/to/repo
@@ -51,8 +51,8 @@ spiral-teacher generate --repo /path/to/repo --resume --max-rounds 10
 # Re-synthesize from existing conversation data
 spiral-teacher synthesize --output output --language zh
 
-# Run tests (125 unit tests)
-python -m pytest tests/ -m "not integration"
+# Run tests (127 unit tests)
+uv run pytest tests/ -m "not integration"
 ```
 
 ## Development Approach

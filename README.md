@@ -6,16 +6,16 @@
 
 ```bash
 # 安装
-pip install -e .
+uv sync
 
 # 生成教程（默认中文）
-spiral-teacher generate --repo /path/to/your/repo
+uv run spiral-teacher generate --repo /path/to/your/repo
 
 # 断点续跑（从上次停下的概念继续）
-spiral-teacher generate --repo /path/to/your/repo --resume --max-rounds 10
+uv run spiral-teacher generate --repo /path/to/your/repo --resume --max-rounds 10
 
 # 只重新合成教程（不重跑对话）
-spiral-teacher synthesize --output output
+uv run spiral-teacher synthesize --output output
 ```
 
 需要设置 `ANTHROPIC_API_KEY` 环境变量。
@@ -71,8 +71,8 @@ spiral-teacher synthesize
 ## Development
 
 ```bash
-pip install -e ".[dev]"
-python -m pytest tests/ -m "not integration"  # 127 unit tests
+uv sync --extra dev
+uv run pytest tests/ -m "not integration"  # 127 unit tests
 ```
 
 详见 [CLAUDE.md](CLAUDE.md) 的开发指引和 [PLAN.md](PLAN.md) 的项目路线图。
