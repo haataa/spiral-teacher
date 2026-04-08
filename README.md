@@ -1,6 +1,6 @@
 ![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
-![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-green.svg)
-![Tests](https://img.shields.io/badge/Tests-127%20passing-brightgreen.svg)
+![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-green.svg)
+![CI](https://github.com/haataa/spiral-teacher/actions/workflows/ci.yml/badge.svg)
 
 # Spiral Teacher
 
@@ -8,7 +8,13 @@
 >
 > 给我一个代码仓库，我把它变成一份从浅到深的教学文档。
 
-*A multi-agent system that reads a code repository and generates spiral-depth teaching tutorials. It simulates a Teacher-Learner dialogue with built-in anti-leniency mechanisms, then synthesizes the conversation into a structured document. One command, one tutorial.*
+A multi-agent system that reads a code repository and generates **adaptive-depth teaching tutorials**. Unlike single-pass LLM explainers, Spiral Teacher simulates a multi-round Teacher-Learner dialogue with built-in anti-leniency mechanisms — the simulated learner pushes back, asks for examples, and demands deeper explanations until the teaching truly reaches the underlying principles. The conversation is then synthesized into a structured tutorial document. One command, one tutorial.
+
+**Key differentiators vs. asking ChatGPT / feeding code to an LLM:**
+- **Adaptive depth** (Level 0–5): from one-line summary to mathematical derivation, automatically calibrated
+- **Anti-leniency guardrails**: triple-layer validation prevents shallow "got it" responses
+- **Importance-first ordering**: core algorithms first, CLI boilerplate last
+- **Audience profiles**: same repo → different tutorials for different readers
 
 ---
 
@@ -30,6 +36,13 @@ Spiral Teacher 用一条命令解决这个问题。它模拟一位教师和一�
 以 [FlashAttention](https://github.com/Dao-AILab/flash-attention) 为例，**一条命令生成 533 行深度教程**。
 
 > [**点击查看完整教程 →**](examples/flash-attention/tutorial.md)
+
+更多示例：
+| 项目 | 领域 | 教程 |
+|------|------|------|
+| [FlashAttention](https://github.com/Dao-AILab/flash-attention) | GPU 注意力优化 | [查看](examples/flash-attention/tutorial.md) |
+| [Eureka](https://github.com/eureka-research/Eureka) | LLM 自动生成 RL 奖励函数 | [查看](examples/eureka/tutorial.md) |
+| [RF-Agent](https://github.com/ZhihaoAIRobotic/RF-Agent) | MCTS + LLM 奖励函数搜索 | [查看](examples/rf-agent/tutorial.md) |
 
 教程开头：
 
